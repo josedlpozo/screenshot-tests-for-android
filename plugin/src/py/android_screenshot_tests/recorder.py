@@ -14,6 +14,7 @@ import sys
 
 from os.path import join
 from PIL import Image, ImageChops
+from .image_diff_highlighter import ImageDiffHighlighter
 
 from . import common
 import shutil
@@ -99,6 +100,8 @@ class Recorder:
             actual = join(self._output, name)
             expected = join(self._realoutput, name)
             if not self._is_image_same(expected, actual):
-                raise VerifyError("Image %s is not same as %s" % (actual, expected))
-
-        shutil.rmtree(self._output)
+                diff_name = screenshot.find('name').text + "_diff.png"
+                diff_path = join(self._output, diff_name)
+                highlighter = ImageDiffHighlighter(actual, expected, diff_path)
+                highlighter.get_differences()
+                print('Screenshot ' + actual + ' and '+ expected +' are not the same. You can see differences in ' + diff_path)
