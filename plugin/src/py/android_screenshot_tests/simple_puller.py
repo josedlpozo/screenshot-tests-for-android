@@ -14,8 +14,10 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import subprocess
+
 from . import common
 from .common import get_adb
+
 
 class SimplePuller:
     """Pulls a given file from the device"""

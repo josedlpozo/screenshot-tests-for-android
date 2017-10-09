@@ -1,10 +1,10 @@
 class ImageVerifyResult:
-    def __init__(self, path_expected, path_actual, are_the_same, path_diff=None):
-        self.path_expected = path_expected
-        self.path_actual = path_actual
+    def __init__(self, test_name, expected_path, actual_path, are_the_same, diff_path=None):
+        self.test_name = test_name
+        self.expected_path = expected_path
+        self.actual_path = actual_path
         self.are_the_same = are_the_same
-        self.path_diff = path_diff
+        self.diff_path = diff_path
 
-    def __str__(self):
-        return "path_expected:{0}, path_actual:{1}, are_the_same:{2}, path_diff:{3}"\
-            .format(self.path_expected, self.path_actual, self.are_the_same, self.path_diff)
+    def is_passed(self):
+        return self.are_the_same

@@ -13,14 +13,16 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import unittest
-from .simple_puller import SimplePuller
+import os
+import shutil
 import subprocess
 import tempfile
-from .common import get_adb
-import shutil
-import os
+import unittest
+
 from . import common
+from .common import get_adb
+from .simple_puller import SimplePuller
+
 
 class TestSimplePuller(unittest.TestCase):
     def setUp(self):

@@ -8,21 +8,19 @@
 # of patent rights can be found in the PATENTS file in the same directory.
 #
 
-import xml.etree.ElementTree as ET
 import os
-import sys
-
+import shutil
+import xml.etree.ElementTree as ET
 from os.path import join
-from PIL import Image, ImageChops
-from .image_diff_highlighter import ImageDiffHighlighter
-from .image_verify_result import ImageVerifyResult
+
+from PIL import Image
 
 from . import common
-import shutil
-import tempfile
+
 
 class VerifyError(Exception):
     pass
+
 
 class Recorder:
     def __init__(self, input, output):
@@ -41,10 +39,9 @@ class Recorder:
 
         canvaswidth = 0
 
-        for i  in range(w):
+        for i in range(w):
             input_file = common.get_image_file_name(name, i, 0)
             canvaswidth += self._get_image_size(join(self._input, input_file))[0]
-
 
         canvasheight = 0
 
@@ -79,37 +76,6 @@ class Recorder:
             shutil.rmtree(self._output)
         os.makedirs(self._output)
 
-    def _is_image_same(self, file1, file2):
-        with Image.open(file1) as im1, Image.open(file2) as im2:
-            diff_image = ImageChops.difference(im1, im2)
-            try:
-                return diff_image.getbbox() is None
-            finally:
-                diff_image.close()
-
     def record(self):
         self._clean()
         self._record()
-
-    def verify(self):
-        self._output = tempfile.mkdtemp()
-        self._record()
-
-        root = self._get_metadata_root()
-        results = []
-        for screenshot in root.iter("screenshot"):
-            name = screenshot.find('name').text + ".png"
-            actual = join(self._output, name)
-            expected = join(self._realoutput, name)
-            if not self._is_image_same(expected, actual):
-                diff_name = screenshot.find('name').text + "_diff.png"
-                diff_path = join(self._output, diff_name)
-                highlighter = ImageDiffHighlighter(actual, expected, diff_path)
-                highlighter.get_differences()
-                results.append(ImageVerifyResult(expected, actual, False, diff_path))
-            else:
-                results.append(ImageVerifyResult(expected, actual, True))
-
-
-        for result in results:
-            print(result)

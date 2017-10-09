@@ -12,28 +12,34 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
+
+import getopt
 import os
+import shutil
+import subprocess
 import sys
 import tempfile
-import subprocess
 import xml.etree.ElementTree as ET
-import getopt
-import shutil
-from . import metadata
-from .simple_puller import SimplePuller
 import zipfile
+from os.path import abspath
+from os.path import join
+
+from android_screenshot_tests.recorder import Recorder
+from android_screenshot_tests.reporter import Reporter
+from android_screenshot_tests.verifier import Verifier
 from . import aapt
 from . import common
+from . import metadata
 from .device_name_calculator import DeviceNameCalculator
-
-from os.path import join
-from os.path import abspath
+from .simple_puller import SimplePuller
 
 OLD_ROOT_SCREENSHOT_DIR = '/data/data/'
 
+
 def usage():
-    print >>sys.stderr, "usage: ./scripts/screenshot_tests/pull_screenshots com.facebook.apk.name.tests [--generate-png]"
+    print >> sys.stderr, "usage: ./scripts/screenshot_tests/pull_screenshots com.facebook.apk.name.tests [--generate-png]"
     return
+
 
 def sort_screenshots(screenshots):
     def sort_key(screenshot):
@@ -44,6 +50,7 @@ def sort_screenshots(screenshots):
         return (group, screenshot.find('name').text)
 
     return sorted(list(screenshots), key=sort_key)
+
 
 def generate_html(dir):
     root = ET.parse(join(dir, 'metadata.xml')).getroot()
@@ -56,7 +63,8 @@ def generate_html(dir):
         html.write('<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>')
         html.write('<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>')
         html.write('<script src="default.js"></script>')
-        html.write('<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/themes/smoothness/jquery-ui.css" />')
+        html.write(
+            '<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/themes/smoothness/jquery-ui.css" />')
         html.write('<link rel="stylesheet" href="default.css"></head>')
         html.write('<body>')
 
@@ -72,7 +80,8 @@ def generate_html(dir):
             if group:
                 html.write('<div class="screenshot_group">%s</div>' % group.text)
 
-            html.write('<button class="view_dump" data-name="%s">Dump view hierarchy</button>' % (screenshot.find('name').text))
+            html.write('<button class="view_dump" data-name="%s">Dump view hierarchy</button>' % (
+                screenshot.find('name').text))
 
             extras = screenshot.find('extras')
             if extras is not None:
@@ -99,6 +108,7 @@ def generate_html(dir):
         html.write('</body></html>')
         return index_html
 
+
 def write_image(dir, html, screenshot):
     html.write('<table class="img-wrapper">')
     for y in range(int(screenshot.find('tile_height').text)):
@@ -121,6 +131,7 @@ def test_for_wkhtmltoimage():
 Download an appropriate version from:
     http://wkhtmltopdf.org/downloads.html""")
 
+
 def generate_png(path_to_html, path_to_png):
     test_for_wkhtmltoimage()
     subprocess.check_call(['wkhtmltoimage', path_to_html, path_to_png], stdout=sys.stdout)
@@ -132,15 +143,18 @@ def copy_assets(destination):
     _copy_asset("default.js", destination)
     _copy_asset("background.png", destination)
 
+
 def _copy_asset(filename, destination):
     thisdir = os.path.dirname(__file__)
     _copy_file(abspath(join(thisdir, filename)), join(destination, filename))
+
 
 def _copy_file(src, dest):
     if os.path.exists(src):
         shutil.copyfile(src, dest)
     else:
         _copy_via_zip(src, None, dest)
+
 
 def _copy_via_zip(src_zip, zip_path, dest):
     if os.path.exists(src_zip):
@@ -154,6 +168,7 @@ def _copy_via_zip(src_zip, zip_path, dest):
 
         _copy_via_zip(head, tail if not zip_path else (tail + "/" + zip_path), dest)
 
+
 def _android_path_join_two(a, b):
     if b.startswith("/"):
         return b
@@ -162,6 +177,7 @@ def _android_path_join_two(a, b):
         a += "/"
 
     return a + b
+
 
 def android_path_join(a, *args):
     """Similar to os.path.join(), but might differ in behavior on Windows"""
@@ -173,6 +189,7 @@ def android_path_join(a, *args):
         return _android_path_join_two(a, args[0])
 
     return android_path_join(android_path_join(a, args[0]), *args[1:])
+
 
 def pull_metadata(package, dir, adb_puller):
     root_screenshot_dir = android_path_join(adb_puller.get_external_data_dir(), "screenshots")
@@ -196,13 +213,15 @@ def pull_metadata(package, dir, adb_puller):
 
     return metadata_file.replace("metadata.xml", "")
 
+
 def create_empty_metadata_file(dir):
     with open(join(dir, 'metadata.xml'), 'w') as out:
         out.write(
 
-    """<?xml version="1.0" encoding="UTF-8"?>
+            """<?xml version="1.0" encoding="UTF-8"?>
 <screenshots>
 </screenshots>""")
+
 
 def pull_images(dir, device_dir, adb_puller):
     root = ET.parse(join(dir, 'metadata.xml')).getroot()
@@ -216,9 +235,11 @@ def pull_images(dir, device_dir, adb_puller):
         if dump_node is not None:
             adb_puller.pull(android_path_join(device_dir, dump_node.text), join(dir, os.path.basename(dump_node.text)))
 
+
 def pull_all(package, dir, adb_puller):
     device_dir = pull_metadata(package, dir, adb_puller=adb_puller)
     pull_images(dir, device_dir, adb_puller=adb_puller)
+
 
 def pull_filtered(package, dir, adb_puller, filter_name_regex=None):
     device_dir = pull_metadata(package, dir, adb_puller=adb_puller)
@@ -226,16 +247,20 @@ def pull_filtered(package, dir, adb_puller, filter_name_regex=None):
     metadata.filter_screenshots(join(dir, 'metadata.xml'), name_regex=filter_name_regex)
     pull_images(dir, device_dir, adb_puller=adb_puller)
 
+
 def _summary(dir):
     root = ET.parse(join(dir, 'metadata.xml')).getroot()
     count = len(root.findall('screenshot'))
     print("Found %d screenshots" % count)
 
+
 def _validate_metadata(dir):
     try:
         ET.parse(join(dir, 'metadata.xml'))
     except ET.ParseError as e:
-        raise RuntimeError("Unable to parse metadata file, this commonly happens if you did not call ScreenshotRunner.onDestroy() from your instrumentation")
+        raise RuntimeError(
+            "Unable to parse metadata file, this commonly happens if you did not call ScreenshotRunner.onDestroy() from your instrumentation")
+
 
 def pull_screenshots(process,
                      adb_puller,
@@ -245,8 +270,8 @@ def pull_screenshots(process,
                      filter_name_regex=None,
                      record=None,
                      verify=None,
+                     report=None,
                      opt_generate_png=None):
-
     if not perform_pull and temp_dir is None:
         raise RuntimeError("""You must supply a directory for temp_dir if --no-pull is present""")
 
@@ -263,18 +288,35 @@ def pull_screenshots(process,
     _validate_metadata(temp_dir)
 
     path_to_html = generate_html(temp_dir)
-    device_name = device_name_calculator.name() if device_name_calculator else None
-    record_dir = join(record, device_name) if record and device_name else record
-    verify_dir = join(verify, device_name) if verify and device_name else verify
 
-    if record or verify:
-        # don't import this early, since we need PIL to import this
-        from .recorder import Recorder
-        recorder = Recorder(temp_dir, record_dir or verify_dir)
-        if verify:
-            recorder.verify()
-        else:
-            recorder.record()
+    device_name = device_name_calculator.name() if device_name_calculator else None
+
+    record_dir = join(record, device_name) if record and device_name else record
+
+    report_dir = join(report, device_name) if device_name else report
+
+    if record:
+        if os.path.exists(report):
+            shutil.rmtree(report)
+
+        recorder = Recorder(temp_dir, record_dir)
+        recorder.record()
+
+    if verify:
+        if os.path.exists(report_dir):
+            shutil.rmtree(report_dir)
+
+        record_dir = join(verify, device_name) if device_name else verify
+        verify_dir = join(report_dir, "screenshots")
+
+        recorder = Recorder(temp_dir, verify_dir)
+        recorder.record()
+
+        verifier = Verifier(common.get_metadata_root(temp_dir), record_dir, verify_dir, report_dir)
+        results = verifier.verify()
+
+        reporter = Reporter(report_dir, results)
+        reporter.generate()
 
     if opt_generate_png:
         generate_png(path_to_html, opt_generate_png)
@@ -286,9 +328,11 @@ def pull_screenshots(process,
         print('  file://%s' % path_to_html)
         print("\n\n")
 
+
 def setup_paths():
     android_home = common.get_android_sdk()
     os.environ['PATH'] = os.environ['PATH'] + ":" + android_home + "/platform-tools/"
+
 
 def main(argv):
     setup_paths()
@@ -296,7 +340,7 @@ def main(argv):
         opt_list, rest_args = getopt.gnu_getopt(
             argv[1:],
             "eds:",
-            ["generate-png=", "filter-name-regex=", "apk", "record=", "verify=", "temp-dir=", "no-pull"])
+            ["generate-png=", "filter-name-regex=", "apk", "record=", "verify=", "report=", "temp-dir=", "no-pull"])
     except getopt.GetoptError as err:
         usage()
         return 2
@@ -332,8 +376,10 @@ def main(argv):
                             opt_generate_png=opts.get('--generate-png'),
                             record=opts.get('--record'),
                             verify=opts.get('--verify'),
+                            report=opts.get('--report'),
                             adb_puller=SimplePuller(puller_args),
                             device_name_calculator=DeviceNameCalculator())
+
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))

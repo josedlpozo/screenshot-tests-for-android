@@ -3,12 +3,13 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import unittest
-from . import aapt
 import os
-import tempfile
 import shutil
+import tempfile
+import unittest
 from os.path import join, dirname
+
+from . import aapt
 from .common import assertRegex
 
 CURDIR = dirname(__file__)

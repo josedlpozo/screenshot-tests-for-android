@@ -8,11 +8,13 @@
 # of patent rights can be found in the PATENTS file in the same directory.
 #
 
-import unittest
 import os
-from . import common
 import subprocess
 import sys
+import unittest
+
+from . import common
+
 
 class TestCommon(unittest.TestCase):
     def setUp(self):

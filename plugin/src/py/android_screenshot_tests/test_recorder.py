@@ -8,14 +8,16 @@
 # of patent rights can be found in the PATENTS file in the same directory.
 #
 
+import os
+import shutil
 import tempfile
 import unittest
-import shutil
-import os
 from os.path import join, exists
-from .recorder import Recorder, VerifyError
 
 from PIL import Image
+
+from .recorder import Recorder
+
 
 class TestRecorder(unittest.TestCase):
     def setUp(self):
@@ -158,38 +160,6 @@ class TestRecorder(unittest.TestCase):
             self.assertEqual((0, 0, 255, 255), im.getpixel((11, 11)))
             self.assertEqual((255, 0, 0, 255), im.getpixel((1, 11)))
 
-    def test_verify_success(self):
-        self.create_temp_image("foobar.png", (10, 10), "blue")
-        self.make_metadata("""<screenshots>
-<screenshot>
-   <name>foobar</name>
-    <tile_width>1</tile_width>
-    <tile_height>1</tile_height>
-</screenshot>
-</screenshots>""")
-
-        self.recorder.record()
-        self.recorder.verify()
-
-    def test_verify_failure(self):
-        self.create_temp_image("foobar.png", (10, 10), "blue")
-        self.make_metadata("""<screenshots>
-<screenshot>
-   <name>foobar</name>
-    <tile_width>1</tile_width>
-    <tile_height>1</tile_height>
-</screenshot>
-</screenshots>""")
-
-        self.recorder.record()
-        os.unlink(join(self.inputdir, "foobar.png"))
-        self.create_temp_image("foobar.png", (10, 10), "red")
-
-        try:
-            self.recorder.verify()
-            self.fail("expected exception")
-        except VerifyError:
-            pass  # expected
 
 if __name__ == '__main__':
     unittest.main()

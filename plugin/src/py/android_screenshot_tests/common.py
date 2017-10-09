@@ -9,8 +9,11 @@
 #
 
 import os
-import sys
 import subprocess
+import sys
+import xml.etree.ElementTree as ET
+from os.path import join
+
 
 def get_image_file_name(name, x, y):
     image_file = name
@@ -41,3 +44,7 @@ def assertRegex(testcase, regex, string):
         testcase.assertRegex(regex, string)
     else:
         testcase.assertRegexpMatches(regex, string)
+
+
+def get_metadata_root(input):
+    return ET.parse(join(input, "metadata.xml")).getroot()

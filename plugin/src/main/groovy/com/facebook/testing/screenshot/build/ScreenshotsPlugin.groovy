@@ -7,6 +7,7 @@ class ScreenshotsPluginExtension {
     def connectedAndroidTestTarget = "connectedAndroidTest"
     def customTestRunner = false
     def recordDir = "screenshots"
+    def reportDir = "reports"
     def addCompileDeps = true
 
     // Only used for the pullScreenshotsFromDirectory task
@@ -59,8 +60,10 @@ class ScreenshotsPlugin implements Plugin<Project> {
 
           if (recordMode) {
             args += ["--record", project.screenshots.recordDir]
+            args += ["--report", project.screenshots.reportDir]
           } else if (verifyMode) {
             args += ["--verify", project.screenshots.recordDir]
+            args += ["--report", project.screenshots.reportDir]
           }
         }
       }

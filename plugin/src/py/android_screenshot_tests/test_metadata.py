@@ -12,12 +12,15 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
-import unittest
-import tempfile
-import shutil
+
 import os
+import shutil
+import tempfile
+import unittest
 import xml.etree.ElementTree as ET
+
 from . import metadata
+
 
 # Tests for the metadata package
 class TestMetadata(unittest.TestCase):

@@ -1,5 +1,6 @@
-from . import common
 import re
+
+from . import common
 
 
 class DeviceNameCalculator:

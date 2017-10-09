@@ -12,14 +12,16 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
-import unittest
+
 import os
-import sys
-from . import pull_screenshots
-import tempfile
 import shutil
+import sys
+import tempfile
+import unittest
 import xml.etree.ElementTree as ET
 from os.path import join
+
+from . import pull_screenshots
 
 if sys.version_info >= (3,):
     from unittest.mock import *
@@ -41,10 +43,12 @@ class LocalFileHelper:
         shutil.copyfile(FIXTURE_DIR + "/com.foo.ScriptsFixtureTest_testSecondScreenshot.png",
                         dir + "/com.foo.ScriptsFixtureTest_testSecondScreenshot.png")
 
+
 def assert_nice_filename(filename):
     if "//" in filename:
         raise RuntimeError("%s is not a canonical filename and can cause problems that are hard to debug"
                            % filename)
+
 
 class AdbPuller:
     def __init__(self, fixture_dir=join(CURRENT_DIR, "fixtures")):
@@ -68,6 +72,7 @@ class AdbPuller:
 
     def get_external_data_dir(self):
         return "/sdcard"
+
 
 class TestAdbHelpers(unittest.TestCase):
     def setUp(self):
@@ -184,7 +189,8 @@ class TestPullScreenshots(unittest.TestCase):
     def test_summary_happyPath(self):
         with tempfile.NamedTemporaryFile(mode='w+t') as f:
             sys.stdout = f
-            pull_screenshots._summary(CURRENT_DIR + '/fixtures/sdcard/screenshots/' + TESTING_PACKAGE + '/screenshots-default')
+            pull_screenshots._summary(
+                CURRENT_DIR + '/fixtures/sdcard/screenshots/' + TESTING_PACKAGE + '/screenshots-default')
             sys.stdout.flush()
 
             f.seek(0)
@@ -199,6 +205,7 @@ class TestPullScreenshots(unittest.TestCase):
     def test_no_pull_argument_does_not_use_adb_on_verify(self):
         source = tempfile.mkdtemp()
         dest = tempfile.mkdtemp()
+        report = tempfile.mkdtemp()
 
         LocalFileHelper().setup(source)
         LocalFileHelper().setup(dest)
@@ -207,11 +214,13 @@ class TestPullScreenshots(unittest.TestCase):
                                           adb_puller=None,
                                           perform_pull=False,
                                           temp_dir=source,
-                                          verify=dest)
+                                          verify=dest,
+                                          report=report)
 
     def test_no_pull_argument_does_not_use_adb_on_record(self):
         source = tempfile.mkdtemp()
         dest = tempfile.mkdtemp()
+        report = tempfile.mkdtemp()
 
         LocalFileHelper().setup(source)
         LocalFileHelper().setup(dest)
@@ -220,7 +229,8 @@ class TestPullScreenshots(unittest.TestCase):
                                           adb_puller=None,
                                           perform_pull=False,
                                           temp_dir=source,
-                                          record=dest)
+                                          record=dest,
+                                          report=report)
 
     def test_no_pull_argument_must_have_temp_dir(self):
 
@@ -266,6 +276,7 @@ class TestPullScreenshots(unittest.TestCase):
             self.fail("expected exception")
         except RuntimeError as e:
             assertRegex(self, e.args[0], ".*ScreenshotRunner.*")
+
 
 class TestAndroidJoin(unittest.TestCase):
     def test_simple(self):

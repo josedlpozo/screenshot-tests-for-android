@@ -12,12 +12,10 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
-import unittest
-import tempfile
-import shutil
-import os
-import xml.etree.ElementTree as ET
+
 import re
+import xml.etree.ElementTree as ET
+
 
 # Given a metadata file locally, this transforms it (in-place), to
 # remove any screenshot elements that don't satisfy the given filter
