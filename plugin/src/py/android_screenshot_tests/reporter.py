@@ -44,21 +44,21 @@ class Reporter:
         for result in self._results:
             test_name = result.test_name
 
-            actual_path = os.path.relpath(result.actual_path, self._path)
             expected_path = os.path.relpath(result.expected_path, self._path)
+            actual_path = os.path.relpath(result.actual_path, self._path)
 
             if result.is_passed():
-                body += self._positive_row(test_name, actual_path, expected_path)
+                body += self._positive_row(test_name, expected_path, actual_path)
             else:
                 diff_path = os.path.relpath(result.diff_path, self._path)
-                body += self._negative_row(test_name, actual_path, expected_path, diff_path)
+                body += self._negative_row(test_name, expected_path, actual_path, diff_path)
 
             body += "\n\n"
 
         with open(join(self._path, "report.html"), "w") as report:
             report.write(self.html.format(body, self._test_results(self._results)))
 
-    def _positive_row(self, test_name, actual_path, expected_path):
+    def _positive_row(self, test_name, expected_path, actual_path):
         positive_row = """
                         <tr>
                             <th>
@@ -72,9 +72,9 @@ class Reporter:
                             </th>
                         </tr>
                         """
-        return positive_row.format(test_name, actual_path, expected_path)
+        return positive_row.format(test_name, expected_path, actual_path)
 
-    def _negative_row(self, test_name, actual_path, expected_path, diff_path):
+    def _negative_row(self, test_name, expected_path, actual_path, diff_path):
         break_test_row = """
                     <tr>
                         <th>
@@ -91,7 +91,7 @@ class Reporter:
                         </th>
                     </tr>
                     """
-        return break_test_row.format(test_name, actual_path, expected_path, diff_path)
+        return break_test_row.format(test_name, expected_path, actual_path, diff_path)
 
     def _test_results(self, results):
         passed = 0
