@@ -27,6 +27,7 @@ from os.path import join
 from android_screenshot_tests.recorder import Recorder
 from android_screenshot_tests.reporter import Reporter
 from android_screenshot_tests.verifier import Verifier
+from android_screenshot_tests.printer import Printer
 from . import aapt
 from . import common
 from . import metadata
@@ -295,6 +296,8 @@ def pull_screenshots(process,
 
     report_dir = join(report, device_name) if device_name else report
 
+    printer = Printer()
+
     if record:
         if os.path.exists(report):
             shutil.rmtree(report)
@@ -307,6 +310,10 @@ def pull_screenshots(process,
             shutil.rmtree(report_dir)
 
         record_dir = join(verify, device_name) if device_name else verify
+        if not os.path.exists(record_dir):
+            printer.fail("You must run a recordMode before trying to verify the screenshots")
+            sys.exit(-1)
+
         verify_dir = join(report_dir, "screenshots")
 
         recorder = Recorder(temp_dir, verify_dir)
