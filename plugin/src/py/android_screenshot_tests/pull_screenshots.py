@@ -28,6 +28,7 @@ from android_screenshot_tests.recorder import Recorder
 from android_screenshot_tests.reporter import Reporter
 from android_screenshot_tests.verifier import Verifier
 from android_screenshot_tests.printer import Printer
+from android_screenshot_tests.results_printer import ResultPrinter
 from . import aapt
 from . import common
 from . import metadata
@@ -322,8 +323,12 @@ def pull_screenshots(process,
         verifier = Verifier(common.get_metadata_root(temp_dir), record_dir, verify_dir, report_dir)
         results = verifier.verify()
 
-        reporter = Reporter(report_dir, results)
+        report_file_name = "report.html"
+        reporter = Reporter(report_dir, results, report_file_name)
         reporter.generate()
+
+        result_printer = ResultPrinter(printer, results, join(report_dir, report_file_name))
+        result_printer.print_results()
 
     if opt_generate_png:
         generate_png(path_to_html, opt_generate_png)

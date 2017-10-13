@@ -3,7 +3,7 @@ from os.path import join
 
 
 class Reporter:
-    def __init__(self, path, results):
+    def __init__(self, path, results, report_file_name):
         self._path = path
         self._results = results
         self.html = """
@@ -38,6 +38,7 @@ class Reporter:
         </body>
         </html>
         """
+        self._report_file_name = report_file_name
 
     def generate(self):
         body = ""
@@ -55,7 +56,7 @@ class Reporter:
 
             body += "\n\n"
 
-        with open(join(self._path, "report.html"), "w") as report:
+        with open(join(self._path, self._report_file_name), "w") as report:
             report.write(self.html.format(body, self._test_results(self._results)))
 
     def _positive_row(self, test_name, expected_path, actual_path):
