@@ -23,9 +23,9 @@ class Reporter:
                     {1}
                     <tr>
                         <th>Test name</th>
-                        <th>Screenshot expected</th>
-                        <th>Screenshot actual</th>
-                        <th>Screenshot diff</th>
+                        <th>Expected screenshot</th>
+                        <th>Current screenshot</th>
+                        <th>Diff screenshot</th>
                     </tr>
                     </thead>
                     <tbody>

@@ -1,5 +1,6 @@
 import os
 
+
 class ResultPrinter:
     def __init__(self, printer, results, report_file_path):
         self.printer = printer
@@ -25,21 +26,19 @@ class ResultPrinter:
         self.print_success_tab("{0} have passed".format(passed))
 
         if not not_passed is 0:
-            self.print_fail_tab("{0} have not passed".format(not_passed))
+            self.print_fail_tab("{0} have errors".format(not_passed))
 
         self.printer.standard("\n")
 
         for result in self.results:
             if result.is_passed():
-                self.print_success_tab(result.test_name + " has passed successfully")
+                self.print_success_tab(result.test_name + " has passed")
             else:
                 self.print_fail_tab(result.test_name + " has errors")
-
 
         self.printer.standard("\n")
         self.printer.standard("You can review these tests in more detail here: \n ")
         self.print_standard_tab("file://{0}".format(os.path.abspath(self.report_file_path)))
-
 
     def tab(self):
         return "    "
@@ -52,4 +51,3 @@ class ResultPrinter:
 
     def print_success_tab(self, text):
         self.printer.success(self.tab() + text)
-
