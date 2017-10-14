@@ -58,12 +58,13 @@ class ScreenshotsPlugin implements Plugin<Project> {
             args += ["--temp-dir", referenceDir]
           }
 
+          args += ["--record-dir", project.screenshots.recordDir]
+          args += ["--report-dir", project.screenshots.reportDir]
+
           if (recordMode) {
-            args += ["--record", project.screenshots.recordDir]
-            args += ["--report", project.screenshots.reportDir]
+            args += ["--record", true]
           } else if (verifyMode) {
-            args += ["--verify", project.screenshots.recordDir]
-            args += ["--report", project.screenshots.reportDir]
+            args += ["--verify", true]
           }
         }
       }

@@ -272,7 +272,8 @@ def pull_screenshots(process,
                      filter_name_regex=None,
                      record=None,
                      verify=None,
-                     report=None,
+                     report_dir=None,
+                     record_dir=None,
                      opt_generate_png=None):
     if not perform_pull and temp_dir is None:
         raise RuntimeError("""You must supply a directory for temp_dir if --no-pull is present""")
@@ -293,41 +294,40 @@ def pull_screenshots(process,
 
     device_name = device_name_calculator.name() if device_name_calculator else None
 
-    record_dir = join(record, device_name) if record and device_name else record
+    record_dir_device = join(record_dir, device_name) if record_dir else None
 
-    report_dir = join(report, device_name) if device_name else report
+    report_dir_device = join(report_dir, device_name) if report_dir else None
 
     printer = Printer()
 
     if record:
-        if os.path.exists(report):
-            shutil.rmtree(report)
+        if os.path.exists(report_dir):
+            shutil.rmtree(report_dir)
 
-        recorder = Recorder(temp_dir, record_dir)
+        recorder = Recorder(temp_dir, record_dir_device)
         recorder.record()
 
     if verify:
         if os.path.exists(report_dir):
             shutil.rmtree(report_dir)
 
-        record_dir = join(verify, device_name) if device_name else verify
-        if not os.path.exists(record_dir):
+        if not os.path.exists(record_dir_device):
             printer.fail("You must run a recordMode before trying to verify the screenshots")
             sys.exit(-1)
 
-        verify_dir = join(report_dir, "screenshots")
+        verify_dir = join(report_dir_device, "screenshots")
 
         recorder = Recorder(temp_dir, verify_dir)
         recorder.record()
 
-        verifier = Verifier(common.get_metadata_root(temp_dir), record_dir, verify_dir, report_dir)
+        verifier = Verifier(common.get_metadata_root(temp_dir), record_dir_device, verify_dir, report_dir_device)
         results = verifier.verify()
 
         report_file_name = "report.html"
-        reporter = Reporter(report_dir, results, report_file_name)
+        reporter = Reporter(report_dir_device, results, report_file_name)
         reporter.generate()
 
-        result_printer = ResultPrinter(printer, results, join(report_dir, report_file_name))
+        result_printer = ResultPrinter(printer, results, join(report_dir_device, report_file_name))
         result_printer.print_results()
 
     if opt_generate_png:
@@ -352,8 +352,8 @@ def main(argv):
         opt_list, rest_args = getopt.gnu_getopt(
             argv[1:],
             "eds:",
-            ["generate-png=", "filter-name-regex=", "apk", "record=", "verify=", "report=", "temp-dir=", "no-pull"])
-    except getopt.GetoptError as err:
+            ["generate-png=", "filter-name-regex=", "apk", "record-dir=", "report-dir=", "record=", "verify=", "temp-dir=", "no-pull"])
+    except getopt.GetoptError:
         usage()
         return 2
 
@@ -388,7 +388,8 @@ def main(argv):
                             opt_generate_png=opts.get('--generate-png'),
                             record=opts.get('--record'),
                             verify=opts.get('--verify'),
-                            report=opts.get('--report'),
+                            report_dir=opts.get('--report-dir'),
+                            record_dir=opts.get('--record-dir'),
                             adb_puller=SimplePuller(puller_args),
                             device_name_calculator=DeviceNameCalculator())
 

@@ -21,6 +21,7 @@ import unittest
 import xml.etree.ElementTree as ET
 from os.path import join
 
+from android_screenshot_tests.device_name_calculator import DeviceNameCalculator
 from . import pull_screenshots
 
 if sys.version_info >= (3,):
@@ -37,6 +38,9 @@ FIXTURE_DIR = '%s/fixtures/sdcard/screenshots/%s/screenshots-default' % (CURRENT
 
 class LocalFileHelper:
     def setup(self, dir):
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+
         shutil.copyfile(FIXTURE_DIR + "/metadata_no_errors.xml", dir + "/metadata.xml")
         shutil.copyfile(FIXTURE_DIR + "/com.foo.ScriptsFixtureTest_testGetTextViewScreenshot.png",
                         dir + "/com.foo.ScriptsFixtureTest_testGetTextViewScreenshot.png")
@@ -203,19 +207,27 @@ class TestPullScreenshots(unittest.TestCase):
         assertRegex(self, os.environ['PATH'], '.*:foobar/platform-tools.*')
 
     def test_no_pull_argument_does_not_use_adb_on_verify(self):
-        source = tempfile.mkdtemp()
+        device_name_calculator = DeviceNameCalculator()
+        name = device_name_calculator.name()
+        source = os.path.join(tempfile.mkdtemp(), name)
         dest = tempfile.mkdtemp()
         report = tempfile.mkdtemp()
 
+        record_dir = os.path.join(dest, name)
+        os.makedirs(record_dir)
+
         LocalFileHelper().setup(source)
         LocalFileHelper().setup(dest)
+        LocalFileHelper().setup(record_dir)
 
         pull_screenshots.pull_screenshots(TESTING_PACKAGE,
                                           adb_puller=None,
                                           perform_pull=False,
+                                          device_name_calculator=device_name_calculator,
                                           temp_dir=source,
-                                          verify=dest,
-                                          report=report)
+                                          verify=True,
+                                          record_dir=dest,
+                                          report_dir=report)
 
     def test_no_pull_argument_does_not_use_adb_on_record(self):
         source = tempfile.mkdtemp()
@@ -228,9 +240,11 @@ class TestPullScreenshots(unittest.TestCase):
         pull_screenshots.pull_screenshots(TESTING_PACKAGE,
                                           adb_puller=None,
                                           perform_pull=False,
+                                          device_name_calculator=DeviceNameCalculator(),
                                           temp_dir=source,
-                                          record=dest,
-                                          report=report)
+                                          record=True,
+                                          record_dir=dest,
+                                          report_dir=report)
 
     def test_no_pull_argument_must_have_temp_dir(self):
 
