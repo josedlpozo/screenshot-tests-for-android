@@ -27,11 +27,13 @@ from Queue import Queue
 from os.path import abspath
 from os.path import join
 
+from android_screenshot_tests import aapt
 from android_screenshot_tests.device_name_calculator import DeviceNameCalculator
 from android_screenshot_tests.printer import Printer
 from android_screenshot_tests.recorder import Recorder
 from android_screenshot_tests.reporter import Reporter
 from android_screenshot_tests.results_printer import ResultPrinter
+from android_screenshot_tests.simple_puller import SimplePuller
 from android_screenshot_tests.verifier import Verifier
 from . import common
 from . import metadata
