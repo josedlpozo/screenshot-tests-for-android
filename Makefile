@@ -49,12 +49,18 @@ app-example-tests:
 app-example-androidjunitrunner-tests:
 	cd examples/app-example-androidjunitrunner && ./gradlew screenshotTests 2>&1 | tee $(TMPFILE)
 
-	grep "Found 3 screenshots" $(TMPFILE)
+	grep "Found 6 screenshots" $(TMPFILE)
+
+app-example-litho-tests:
+	cd examples/app-example-litho && ./gradlew screenshotTests 2>&1 | tee $(TMPFILE)
+	grep "Found 1 screenshots" $(TMPFILE)
 
 
 install-local:
 	./gradlew :plugin:install
 	./gradlew :core:install
+	./gradlew :layout-hierarchy-common:install
+	./gradlew :layout-hierarchy-litho:install
 
 version-tag:
 	git tag v$(OLD_VERSION)

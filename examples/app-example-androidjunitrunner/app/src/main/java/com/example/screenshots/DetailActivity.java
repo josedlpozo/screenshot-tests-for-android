@@ -1,9 +1,11 @@
+// Copyright 2004-present Facebook. All Rights Reserved.
+
 package com.example.screenshots;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.widget.TextView;
 
 public class DetailActivity extends AppCompatActivity {
@@ -12,7 +14,7 @@ public class DetailActivity extends AppCompatActivity {
   public static final String TEXT = "text";
 
   enum Type {
-    WARNING, OK, ERROR
+WARNING, OK, ERROR
   }
 
   @Override

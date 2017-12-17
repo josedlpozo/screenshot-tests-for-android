@@ -78,7 +78,8 @@ if (property('POM_PACKAGING') == 'aar') {
     task androidJavadoc(type: Javadoc) {
         source = android.sourceSets.main.java.srcDirs
         classpath += files(android.bootClasspath)
-        exclude "com/facebook/testing/screenshot/BUCK"
+        exclude "**/BUCK"
+
         project.android.libraryVariants.all { variant ->
           if (variant.name == "release") {
             classpath += files(variant.javaCompile.classpath.files)
@@ -86,7 +87,6 @@ if (property('POM_PACKAGING') == 'aar') {
         }
 
         if (JavaVersion.current().isJava8Compatible()) {
-            println("this is java8")
             options.addStringOption('Xdoclint:none', '-quiet')
         }
     }
@@ -152,8 +152,6 @@ afterEvaluate { project ->
             userName: getRepositoryUsername(),
                          password: getRepositoryPassword())
         }
-
-        // repository(url: "file://localhost/")
 
         configureScreenshotTestsForAndroidPom pom
       }
