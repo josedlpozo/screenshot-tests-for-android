@@ -1,11 +1,11 @@
-// Copyright 2004-present Facebook. All Rights Reserved.
-
 package com.example.screenshots;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.support.test.rule.ActivityTestRule;
+
 import com.facebook.testing.screenshot.Screenshot;
+
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -17,7 +17,8 @@ public class DetailActivityTest {
 
   @Test
   public void errorTextShouldBeRed() {
-    final Intent intent = given(DetailActivity.Type.ERROR, "Error 500: internal server error");
+    final Intent intent = given(DetailActivity.Type.ERROR,
+        "Error 500: internal server error");
     Activity activity = startActivity(intent);
 
     Screenshot.snapActivity(activity).record();
@@ -25,8 +26,8 @@ public class DetailActivityTest {
 
   @Test
   public void warningTextShouldBeYellow() {
-    final Intent intent =
-        given(DetailActivity.Type.WARNING, "Method onAttach(Context context) is deprecated");
+    final Intent intent = given(DetailActivity.Type.WARNING,
+        "Method onAttach(Context context) is deprecated");
     Activity activity = startActivity(intent);
 
     Screenshot.snapActivity(activity).record();
@@ -34,7 +35,8 @@ public class DetailActivityTest {
 
   @Test
   public void okTextShouldBeGreen() {
-    final Intent intent = given(DetailActivity.Type.OK, "Screenshot testing is wonderful");
+    final Intent intent = given(DetailActivity.Type.OK,
+        "Screenshot testing is wonderful");
     Activity activity = startActivity(intent);
 
     Screenshot.snapActivity(activity).record();
