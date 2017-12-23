@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+ *
+ * <p>This source code is licensed under the license found in the LICENSE-examples file in the root
+ * directory of this source tree.
+ */
 package com.example.screenshots;
 
 
@@ -25,27 +31,26 @@ public class MainActivityTest {
     public ActivityTestRule<MainActivity> mActivityTestRule =
         new ActivityTestRule<>(MainActivity.class, true, false);
 
-    @Test
-    public void mainActivityTest() {
+  @Test
+  public void mainActivityTest() {
         final MainActivity activity = mActivityTestRule.launchActivity(null);
 
         Screenshot.snapActivity(activity).record();
-    }
+  }
 
-    @Test
-    public void mainActivityTestSettingsOpen() {
+  @Test
+  public void mainActivityTestSettingsOpen() {
         final MainActivity activity = mActivityTestRule.launchActivity(null);
-        ViewInteraction floatingActionButton = onView(
-                allOf(withId(R.id.fab), isDisplayed()));
-        floatingActionButton.perform(click());
+    ViewInteraction floatingActionButton = onView(allOf(withId(R.id.fab), isDisplayed()));
+    floatingActionButton.perform(click());
 
-        openActionBarOverflowOrOptionsMenu(getInstrumentation().getTargetContext());
+    openActionBarOverflowOrOptionsMenu(getInstrumentation().getTargetContext());
         Screenshot.snapActivity(activity).record();
-    }
+  }
 
-    @Test
-    public void mainActivityTestFabWithEspresso() {
+  @Test
+  public void mainActivityTestFabWithEspresso() {
         mActivityTestRule.launchActivity(null);
-        onView(withId(R.id.fab)).perform(screenshot("fab"));
-    }
+    onView(withId(R.id.fab)).perform(screenshot("fab"));
+  }
 }
