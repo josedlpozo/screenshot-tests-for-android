@@ -5,15 +5,19 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 
-include_defs("//SCREENSHOT_TESTS_DEFS")
+load("//:SCREENSHOT_TESTS_DEFS", "SCREENSHOT_TESTS_CORE_TARGET", "SCREENSHOT_TESTS_LAYOUT_HIERARCHY_COMMON_TARGET", "SCREENSHOT_TESTS_LAYOUT_HIERARCHY_LITHO_TARGET", "SCREENSHOT_TESTS_VISIBILITY")
 
 android_library(
     name = "screenshot",
     exported_deps = [
         SCREENSHOT_TESTS_CORE_TARGET,
+        SCREENSHOT_TESTS_LAYOUT_HIERARCHY_COMMON_TARGET,
+        SCREENSHOT_TESTS_LAYOUT_HIERARCHY_LITHO_TARGET,
     ],
     visibility = SCREENSHOT_TESTS_VISIBILITY,
     deps = [
         SCREENSHOT_TESTS_CORE_TARGET,
+        SCREENSHOT_TESTS_LAYOUT_HIERARCHY_COMMON_TARGET,
+        SCREENSHOT_TESTS_LAYOUT_HIERARCHY_LITHO_TARGET,
     ],
 )

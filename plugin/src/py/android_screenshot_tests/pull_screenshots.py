@@ -23,26 +23,40 @@ import sys
 import tempfile
 import xml.etree.ElementTree as ET
 import zipfile
-from Queue import Queue
-from os.path import abspath
-from os.path import join
 
-from android_screenshot_tests import aapt
-from android_screenshot_tests.device_name_calculator import DeviceNameCalculator
-from android_screenshot_tests.printer import Printer
-from android_screenshot_tests.recorder import Recorder
-from android_screenshot_tests.reporter import Reporter
-from android_screenshot_tests.results_printer import ResultPrinter
-from android_screenshot_tests.simple_puller import SimplePuller
-from android_screenshot_tests.verifier import Verifier
+from . import aapt
 from . import common
 from . import metadata
+from .device_name_calculator import DeviceNameCalculator
+from .no_op_device_name_calculator import NoOpDeviceNameCalculator
+from .simple_puller import SimplePuller
+
+from os.path import join
+from os.path import abspath
+
+try:
+    from Queue import Queue
+except ImportError:
+    from queue import Queue
+
+from .printer import Printer
+from .recorder import Recorder
+from .reporter import Reporter
+from .results_printer import ResultPrinter
+from .simple_puller import SimplePuller
+from .verifier import Verifier
 
 OLD_ROOT_SCREENSHOT_DIR = '/data/data/'
+KEY_CLASS = 'class'
+KEY_LEFT = 'left'
+KEY_TOP = 'top'
+KEY_WIDTH = 'width'
+KEY_HEIGHT = 'height'
+
 
 
 def usage():
-    print >> sys.stderr, "usage: ./scripts/screenshot_tests/pull_screenshots com.facebook.apk.name.tests [--generate-png]"
+    print ( "usage: ./scripts/screenshot_tests/pull_screenshots com.facebook.apk.name.tests [--generate-png]", file=sys.stderr)
     return
 
 
@@ -66,8 +80,10 @@ def generate_html(dir):
         html.write('<html>')
         html.write('<head>')
         html.write('<title>Screenshot Test Results</title>')
-        html.write('<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>')
-        html.write('<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>')
+        html.write(
+            '<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>')
+        html.write(
+            '<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>')
         html.write('<script src="default.js"></script>')
         html.write(
             '<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/themes/smoothness/jquery-ui.css" />')
@@ -170,18 +186,18 @@ def write_view_hierarchy_overlay_nodes(hierarchy, html, parent_id):
     to_output.put(hierarchy)
     while not to_output.empty():
         node = to_output.get()
-        x = node['x']
-        y = node['y']
-        width = node['width'] - 4
-        height = node['height'] - 4
+        left = node[KEY_LEFT]
+        top  = node[KEY_TOP]
+        width = node[KEY_WIDTH] - 4
+        height = node[KEY_HEIGHT] - 4
         id = get_view_hierarchy_overlay_node_id(node)
         node_html = """
-        <div 
-          class="hierarchy-node" 
+        <div
+          class="hierarchy-node"
           style="left:%dpx;top:%dpx;width:%dpx;height:%dpx;"
           id="%s-%s"></div>
         """
-        html.write(node_html % (x, y, width, height, parent_id, id))
+        html.write(node_html % (left, top, width, height, parent_id, id))
 
         if 'children' in node:
             for child in node['children']:
@@ -189,11 +205,11 @@ def write_view_hierarchy_overlay_nodes(hierarchy, html, parent_id):
 
 
 def get_view_hierarchy_overlay_node_id(node):
-    cls = node['class']
-    x = node['x']
-    y = node['y']
-    width = node['width']
-    height = node['height']
+    cls = node[KEY_CLASS]
+    x = node[KEY_LEFT]
+    y = node[KEY_TOP]
+    width = node[KEY_WIDTH]
+    height = node[KEY_HEIGHT]
     return "node-%s-%d-%d-%d-%d" % (cls.replace(".", "-"), x, y, width, height)
 
 
@@ -320,8 +336,8 @@ def create_empty_metadata_file(dir):
         out.write(
 
             """<?xml version="1.0" encoding="UTF-8"?>
-<screenshots>
-</screenshots>""")
+        <screenshots>
+        </screenshots>""")
 
 
 def pull_images(dir, device_dir, adb_puller):
@@ -334,7 +350,8 @@ def pull_images(dir, device_dir, adb_puller):
                 join(dir, os.path.basename(filename_node.text)))
         dump_node = s.find('view_hierarchy')
         if dump_node is not None:
-            adb_puller.pull(android_path_join(device_dir, dump_node.text), join(dir, os.path.basename(dump_node.text)))
+            adb_puller.pull(android_path_join(device_dir, dump_node.text),
+                            join(dir, os.path.basename(dump_node.text)))
 
 
 def pull_all(package, dir, adb_puller):
@@ -385,11 +402,15 @@ def pull_screenshots(process,
     copy_assets(temp_dir)
 
     if perform_pull is True:
-        pull_filtered(process, adb_puller=adb_puller, dir=temp_dir, filter_name_regex=filter_name_regex)
+        pull_filtered(process, adb_puller=adb_puller, dir=temp_dir,
+                      filter_name_regex=filter_name_regex)
 
     _validate_metadata(temp_dir)
 
     path_to_html = generate_html(temp_dir)
+    device_name = device_name_calculator.name() if device_name_calculator else None
+    record_dir = join(record, device_name) if record and device_name else record
+    verify_dir = join(verify, device_name) if verify and device_name else verify
 
     device_name = device_name_calculator.name() if device_name_calculator else None
 
@@ -452,7 +473,8 @@ def main(argv):
             argv[1:],
             "eds:",
             ["generate-png=", "filter-name-regex=", "apk", "record-dir=", "report-dir=", "record=", "verify=",
-             "temp-dir=", "no-pull"])
+             "temp-dir=",
+             "no-pull", "multiple-devices="])
     except getopt.GetoptError:
         usage()
         return 2
@@ -480,6 +502,9 @@ def main(argv):
 
     if "-s" in opts:
         puller_args += ["-s", opts["-s"]]
+
+    multiple_devices = opts.get('--multiple-devices')
+    device_calculator = DeviceNameCalculator() if multiple_devices else NoOpDeviceNameCalculator()
 
     return pull_screenshots(process,
                             perform_pull=should_perform_pull,
