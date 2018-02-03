@@ -39,6 +39,12 @@ try:
 except ImportError:
     from queue import Queue
 
+from .printer import Printer
+from .recorder import Recorder
+from .reporter import Reporter
+from .results_printer import ResultPrinter
+from .simple_puller import SimplePuller
+from .verifier import Verifier
 
 OLD_ROOT_SCREENSHOT_DIR = '/data/data/'
 KEY_CLASS = 'class'
@@ -402,6 +408,9 @@ def pull_screenshots(process,
     _validate_metadata(temp_dir)
 
     path_to_html = generate_html(temp_dir)
+    device_name = device_name_calculator.name() if device_name_calculator else None
+    record_dir = join(record, device_name) if record and device_name else record
+    verify_dir = join(verify, device_name) if verify and device_name else verify
 
     device_name = device_name_calculator.name() if device_name_calculator else None
 
@@ -507,7 +516,7 @@ def main(argv):
                             report_dir=opts.get('--report-dir'),
                             record_dir=opts.get('--record-dir'),
                             adb_puller=SimplePuller(puller_args),
-                            device_name_calculator=device_calculator)
+                            device_name_calculator=DeviceNameCalculator())
 
 
 if __name__ == '__main__':
